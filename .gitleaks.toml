@@ -1,0 +1,9 @@
+[extend]
+useDefault = true
+
+[[allowlist]]
+description = "Ignorer les caches et dossiers non applicatifs"
+paths = [
+  '''\.cache/.*''',
+  '''\.git/.*''',
+]

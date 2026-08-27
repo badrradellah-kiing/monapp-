@@ -14,6 +14,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Scan des secrets (gitleaks)
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
+            detect --source /repo --no-git \
+            --config /repo/.gitleaks.toml -v
+
       - name: Scan des dépendances (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
@@ -23,11 +29,6 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: 1
           ignore-unfixed: true
-
-      - name: Scan des secrets (gitleaks)
-        run: |
-          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
-            detect --source /repo --no-git -v
 
       - name: Construire l'image
         run: docker build -t mon-app:${{ github.sha }} .
