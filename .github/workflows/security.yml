@@ -15,8 +15,8 @@ jobs:
       - name: Scan des secrets (gitleaks)
         uses: gitleaks/gitleaks-action@v2
 
-      - name: Scan des dépendances et de l'IaC (Trivy)
-        uses: aquasecurity/trivy-action@0.28.0
+      - name: Scan des dépendances (Trivy)
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
           scan-ref: .
