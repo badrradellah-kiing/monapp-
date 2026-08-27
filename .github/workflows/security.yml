@@ -24,7 +24,19 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
 
-      - name: Scan des secrets (gitleaks en direct)
+      - name: Scan des secrets (gitleaks)
         run: |
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
             detect --source /repo --no-git -v
+
+      - name: Construire l'image
+        run: docker build -t mon-app:${{ github.sha }} .
+
+      - name: Scan de l'image (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: mon-app:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          ignore-unfixed: true
