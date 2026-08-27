@@ -4,6 +4,8 @@ on: [push, pull_request]
 
 permissions:
   contents: read
+  packages: write
+  id-token: write
 
 jobs:
   scan:
@@ -17,8 +19,7 @@ jobs:
       - name: Scan des secrets (gitleaks)
         run: |
           docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:latest \
-            detect --source /repo --no-git \
-            --config /repo/.gitleaks.toml -v
+            detect --source /repo --no-git --config /repo/.gitleaks.toml -v
 
       - name: Scan des dépendances (Trivy)
         uses: aquasecurity/trivy-action@master
@@ -30,14 +31,32 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
 
-      - name: Construire l'image
-        run: docker build -t mon-app:${{ github.sha }} .
+      - name: Connexion au registre GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construire et publier l'image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          docker build -t $IMAGE .
+          docker push $IMAGE
 
       - name: Scan de l'image (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
-          image-ref: mon-app:${{ github.sha }}
+          image-ref: ${{ env.IMAGE }}
           severity: HIGH,CRITICAL
           exit-code: 1
           ignore-unfixed: true
+
+      - name: Installer Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Signer l'image (keyless)
+        if: github.ref == 'refs/heads/main'
+        run: cosign sign --yes ${{ env.IMAGE }}
