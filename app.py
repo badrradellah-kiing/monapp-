@@ -1,4 +1,4 @@
-AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+import os
 
 def saluer(nom):
     return f"Bonjour {nom}"
