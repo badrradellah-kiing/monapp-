@@ -1,7 +1,7 @@
 [extend]
 useDefault = true
 
-[[allowlist]]
+[allowlist]
 description = "Ignorer les caches et dossiers non applicatifs"
 paths = [
   '''\.cache/.*''',
