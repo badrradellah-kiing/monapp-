@@ -38,10 +38,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Définir le nom de l'image (en minuscules, propre)
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/${OWNER}/mon-app-cicd:${{ github.sha }}" >> $GITHUB_ENV
+
       - name: Construire et publier l'image
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}
-          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
           docker build -t $IMAGE .
           docker push $IMAGE
 
